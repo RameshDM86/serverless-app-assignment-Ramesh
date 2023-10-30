@@ -1,7 +1,7 @@
 terraform {
   backend "s3" {
-    bucket = "sctp-ce2-tfstate-bkt"
-    key    = "terraform.tfstate"
-    region = "ap-southeast-1"
+    bucket = "Ramesh_bucket"
+    key    = "terraform.tfstate/ramesh"
+    region = "us-east-1"
   }
 }

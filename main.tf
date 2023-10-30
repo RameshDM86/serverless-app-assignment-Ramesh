@@ -1,38 +1,38 @@
-data "aws_iam_policy_document" "topic" {
+data "aws_iam_policy_document" "queue" {
   statement {
     effect = "Allow"
 
     principals {
-      type        = "Service"
-      identifiers = ["s3.amazonaws.com"]
+      type        = "*"
+      identifiers = ["*"]
     }
 
-    actions   = ["SNS:Publish"]
-    resources = ["arn:aws:sns:*:*:s3-event-notification-topic"]
+    actions   = ["sqs:SendMessage"]
+    resources = ["arn:aws:sqs:*:*:s3-event-notification-queue"]
 
     condition {
-      test     = "ArnLike"
+      test     = "ArnEquals"
       variable = "aws:SourceArn"
       values   = [aws_s3_bucket.bucket.arn]
     }
   }
 }
-resource "aws_sns_topic" "topic" {
-  name   = "s3-event-notification-topic"
-  policy = data.aws_iam_policy_document.topic.json
+
+resource "aws_sqs_queue" "queue" {
+  name   = "s3-event-notification-queue"
+  policy = data.aws_iam_policy_document.queue.json
 }
 
 resource "aws_s3_bucket" "bucket" {
-  bucket = "your-bucket-name"
+  bucket = "Ramesh-bucket"
 }
 
 resource "aws_s3_bucket_notification" "bucket_notification" {
   bucket = aws_s3_bucket.bucket.id
 
-  topic {
-    topic_arn     = aws_sns_topic.topic.arn
+  queue {
+    queue_arn     = aws_sqs_queue.queue.arn
     events        = ["s3:ObjectCreated:*"]
     filter_suffix = ".log"
   }
 }
-
